@@ -26,7 +26,7 @@ const server = http.createServer((req, res) => {
             // console.log("Body ", body)
         });
         //Another event is to be fired once it completes parsing request. That event is end.
-        req.on('end', () => {
+        return req.on('end', () => {
             //To interact with the chunks or streams we need to buffer
             const parsedBody = Buffer.concat(body).toString();
             console.log("Parsed Body ", parsedBody)
@@ -34,11 +34,18 @@ const server = http.createServer((req, res) => {
             console.log("Message", message)
             const firstWord = message.split('+')[0];
             // name of file is the first letter of the message and message is whole message
-            fs.writeFileSync(firstWord+'.txt', message)
+            //writefilesync() blocks the code execution before execution of this function. For large files this is not recommended. Use writefile()
+            // fs.writeFileSync(firstWord+'.txt', message)
+            //Third argument is registration of event listener
+            fs.writeFile(firstWord+'.txt', message)
+            res.statusCode = 302;
+            res.setHeader('Location', '/');
+            return res.end();
         });
-        res.statusCode = 302;
-        res.setHeader('Location', '/');
-        return res.end();
+        //If response does matter than do not put this here
+        // res.statusCode = 302;
+        // res.setHeader('Location', '/');
+        // return res.end();
     }
     res.setHeader('Content-Type', 'text/html')
     res.write('<html>')
